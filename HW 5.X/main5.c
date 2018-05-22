@@ -39,7 +39,7 @@
 
 void i2c_write(unsigned char, unsigned char);
 unsigned char i2c_read();
-
+void initExp();
 
 int main() {
 
