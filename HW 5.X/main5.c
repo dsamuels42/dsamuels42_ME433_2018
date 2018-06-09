@@ -64,7 +64,7 @@ int main() {
     initExp();
     
     //setup for heartbeat
-    int reset_time = 24000000/5/2;
+    int reset_time = 24000000/10;
     _CP0_SET_COUNT(0);
     
     //setup io pins
@@ -75,7 +75,7 @@ int main() {
         //enable heartbeat at 5Hz
         if (_CP0_GET_COUNT() >= reset_time) {
             _CP0_SET_COUNT(0);
-            PORTAINV = 0x00000010;
+            LATAbits.LATA4 ^= 1;
         }
         
         if(i2c_read() & 0x80) {
@@ -116,6 +116,7 @@ unsigned char i2c_read() {
     i2c_master_restart();
     i2c_master_send(ADDR<<1|1);
     unsigned char r = i2c_master_recv();
+    i2c_master_ack(1);
     i2c_master_stop();
     return r;
 }

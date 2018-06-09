@@ -1,4 +1,4 @@
-//#include "NU32.h"       // constants, funcs for startup and UART
+/*//#include "NU32.h"       // constants, funcs for startup and UART
 // Demonstrates spi by accessing external ram
 // PIC is the master, ram is the slave
 // Uses microchip 23K256 ram chip (see the data sheet for protocol details)
@@ -114,3 +114,4 @@ int main(void) {
     }
     return 0;
 }
+*/

@@ -70,17 +70,23 @@ int main() {
     _CP0_SET_COUNT(0);
     
     LCD_init();
-    LCD_clearScreen(GREEN);
+    LCD_clearScreen(BLACK);
     int progress = 0;
+    int time = 0;
     
     while(1) {
-        if (_CP0_GET_COUNT() >= reset_time) {
+        if ((time = _CP0_GET_COUNT()) >= reset_time) {
+            //time = _CP0_GET_COUNT();
             _CP0_SET_COUNT(0);
+            char time_out[3];
+            time_out[1] = 0;
+            sprintf(time_out, "%d ", reset_time * 10 / time);
+            draw_string(0, 0, time_out, CYAN, BLACK);
             char message[26];
-            sprintf(message, "Hello world %d", progress);
-            draw_string(28, 32, message, CYAN, GREEN);
-            draw_bar(28, 45, progress, 100, CYAN, MAGENTA);
-            progress++;
+            sprintf(message, "Hello world %d!", progress);
+            draw_string(28, 32, message, CYAN, BLACK);
+            draw_bar(28, 45, progress*3/4, 75, CYAN, MAGENTA);
+            progress = (progress + 1) % 100;
         }
         
 	// use _CP0_SET_COUNT(0) and _CP0_GET_COUNT() to test the PIC timing
