@@ -62,6 +62,17 @@ int len;//, i = 0;
 int startTime = 0; // to remember the loop time
 int writeCount = 0;
 
+#define MAF_ORDER 8
+#define FIR_ORDER 8
+int maf_data[MAF_ORDER];
+int maf_pos = 0;
+int fir_intermed[FIR_ORDER];
+float fir_coeffs[] = {0.0144, 0.0439, 0.1202, 0.2025, 0.2380, 
+                    0.2025, 0.1202, 0.0439, 0.0144};
+float iir_a = 0.9;
+float iir_b = 0.1;
+int iir_last_val = 0;
+
 // *****************************************************************************
 /* Application Data
   Summary:
@@ -463,16 +474,39 @@ void APP_Tasks(void) {
             if (writeCount > 0) {
                 char vals[14];
                 i2c_read_multiple(0x20, vals, 14); //read 14 bytes starting at OUT_TEMP_L
-                short temp =    vals[0] | (vals[1] << 8);
-                short gyroX =   vals[2] | (vals[3] << 8);
-                short gyroY =   vals[4] | (vals[5] << 8);
-                short gyroZ =   vals[6] | (vals[7] << 8);
-                short accelX =  vals[8] | (vals[9] << 8);
-                short accelY =  vals[10] | (vals[11] << 8);
+                //short temp =    vals[0] | (vals[1] << 8);
+                //short gyroX =   vals[2] | (vals[3] << 8);
+                //short gyroY =   vals[4] | (vals[5] << 8);
+                //short gyroZ =   vals[6] | (vals[7] << 8);
+                //short accelX =  vals[8] | (vals[9] << 8);
+                //short accelY =  vals[10] | (vals[11] << 8);
                 short accelZ =  vals[12] | (vals[13] << 8);
                 
-                len = sprintf(dataOut, "%d %d %d %d %d %d %d\r\n", 
-                        100 - writeCount, accelX, accelY, accelZ, gyroX, gyroY, gyroZ);
+                maf_data[maf_pos] = accelZ;
+                maf_pos = (maf_pos + 1) % MAF_ORDER;
+                int maf = 0;
+                int maf_i;
+                for (maf_i = 0; maf_i < MAF_ORDER; maf_i++) {
+                    maf += maf_data[maf_i];
+                }
+                maf /= MAF_ORDER;
+                
+                int fir_i;
+                for (fir_i = FIR_ORDER - 1; fir_i > 0; fir_i--) {
+                    fir_intermed[fir_i] = fir_intermed[fir_i - 1];
+                }
+                fir_intermed[0] = accelZ;
+                float fir_f = 0;
+                for (fir_i = 0; fir_i < FIR_ORDER; fir_i++) {
+                    fir_f += fir_intermed[fir_i] * fir_coeffs[fir_i];
+                }
+                int fir = (int)fir_f;
+                
+                int iir = iir_a * iir_last_val + iir_b * accelZ;
+                iir_last_val = iir;
+                
+                len = sprintf(dataOut, "%d %d %d %d %d\r\n", 
+                        100 - writeCount, accelZ, maf, fir, iir);
                 writeCount--;
             } else {
                 dataOut[0] = 0;
