@@ -57,7 +57,7 @@ int main() {
 
     __builtin_enable_interrupts();
 
-    int reset_time = 48000/4;
+    int reset_time = 24000000/4;
     _CP0_SET_COUNT(0);
     
     TRISBbits.TRISB4 = 1;
