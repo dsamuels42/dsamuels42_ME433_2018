@@ -190,8 +190,8 @@ void APP_Tasks ( void )
 
         case APP_STATE_SERVICE_TASKS:
         {
-            l_duty = 75;
-            r_duty = 25;
+            l_duty = 15;
+            r_duty = 15;
             break;
         }
 
